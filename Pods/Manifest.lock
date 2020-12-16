@@ -1,0 +1,109 @@
+PODS:
+  - ijkplayerssl (1.1.4)
+  - Masonry (1.1.0)
+  - SJBaseVideoPlayer (3.4.3):
+    - Masonry
+    - SJBaseVideoPlayer/AVPlayer (= 3.4.3)
+    - SJBaseVideoPlayer/Common (= 3.4.3)
+    - SJUIKit/AttributesFactory (>= 0.0.0.38)
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJBaseVideoPlayer/AVPlayer (3.4.3):
+    - Masonry
+    - SJBaseVideoPlayer/Common
+    - SJUIKit/AttributesFactory (>= 0.0.0.38)
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJBaseVideoPlayer/Common (3.4.3):
+    - Masonry
+    - SJBaseVideoPlayer/ResourceLoader
+    - SJUIKit/AttributesFactory (>= 0.0.0.38)
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJBaseVideoPlayer/IJKPlayer (3.4.3):
+    - ijkplayerssl
+    - Masonry
+    - SJBaseVideoPlayer/Common
+    - SJUIKit/AttributesFactory (>= 0.0.0.38)
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJBaseVideoPlayer/ResourceLoader (3.4.3):
+    - Masonry
+    - SJUIKit/AttributesFactory (>= 0.0.0.38)
+    - SJUIKit/ObserverHelper
+    - SJUIKit/Queues
+    - SJUIKit/SQLite3
+  - SJUIKit/AttributesFactory (0.0.0.51):
+    - SJUIKit/AttributesFactory/Deprecated (= 0.0.0.51)
+    - SJUIKit/AttributesFactory/UIKitText (= 0.0.0.51)
+  - SJUIKit/AttributesFactory/Deprecated (0.0.0.51)
+  - SJUIKit/AttributesFactory/UIKitText (0.0.0.51)
+  - SJUIKit/ObserverHelper (0.0.0.51)
+  - SJUIKit/Queues (0.0.0.51)
+  - SJUIKit/SQLite3 (0.0.0.51):
+    - SJUIKit/SQLite3/Core (= 0.0.0.51)
+    - SJUIKit/SQLite3/Protocol (= 0.0.0.51)
+    - YYModel
+  - SJUIKit/SQLite3/Core (0.0.0.51):
+    - SJUIKit/SQLite3/Protocol
+    - YYModel
+  - SJUIKit/SQLite3/Protocol (0.0.0.51):
+    - YYModel
+  - SJVideoPlayer (3.2.8):
+    - SJBaseVideoPlayer (>= 3.4.3)
+    - SJVideoPlayer/Common (= 3.2.8)
+    - SJVideoPlayer/ControlLayers (= 3.2.8)
+    - SJVideoPlayer/ResourceLoader (= 3.2.8)
+  - SJVideoPlayer/Common (3.2.8):
+    - Masonry
+    - SJBaseVideoPlayer (>= 3.4.3)
+    - SJUIKit/AttributesFactory
+    - SJVideoPlayer/ResourceLoader
+  - SJVideoPlayer/ControlLayers (3.2.8):
+    - SJBaseVideoPlayer (>= 3.4.3)
+    - SJVideoPlayer/Common
+  - SJVideoPlayer/ResourceLoader (3.2.8):
+    - SJBaseVideoPlayer (>= 3.4.3)
+  - SnapKit (5.0.1)
+  - YYModel (1.0.4)
+
+DEPENDENCIES:
+  - ijkplayerssl (from `https://gitee.com/changsanjiang/ijkplayer.git`)
+  - SJBaseVideoPlayer/IJKPlayer
+  - SJVideoPlayer
+  - SnapKit
+
+SPEC REPOS:
+  trunk:
+    - Masonry
+    - SJBaseVideoPlayer
+    - SJUIKit
+    - SJVideoPlayer
+    - SnapKit
+    - YYModel
+
+EXTERNAL SOURCES:
+  ijkplayerssl:
+    :git: https://gitee.com/changsanjiang/ijkplayer.git
+
+CHECKOUT OPTIONS:
+  ijkplayerssl:
+    :commit: 5b956920cc3a8867847f2340a11e8a4323a4e9fa
+    :git: https://gitee.com/changsanjiang/ijkplayer.git
+
+SPEC CHECKSUMS:
+  ijkplayerssl: 595307d7d3ca305450d22af27cd638c659fa988d
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  SJBaseVideoPlayer: 7af90105490cc751c2ddbfa615c943f88b256216
+  SJUIKit: bdf86af3648e70483c57e2bfe2fcc7531337fa54
+  SJVideoPlayer: 0cbef06cd6c762c4d672a664a87164ed430972dd
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
+
+PODFILE CHECKSUM: 18737680912c635c4f74ae736767a3839546fba9
+
+COCOAPODS: 1.9.3
