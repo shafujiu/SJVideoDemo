@@ -19,7 +19,7 @@ class ViewController: UIViewController {
 //        player = SJVideoPlayer()
         
         
-        
+        addCustomControlLayerToSwitcher()
         
         let bottomAdapter = player.defaultEdgeControlLayer.bottomAdapter
         
@@ -83,8 +83,16 @@ class ViewController: UIViewController {
         
     }
 
+    // 自定义控制层
+    private func addCustomControlLayerToSwitcher() {
+        player.switcher.addControlLayer(forIdentifier: SJControlLayer_Edge) { (identifer) -> SJControlLayer in
+            SJCustomControlLayerViewController()
+        }
+    }
     
+
     
+    // 全屏处理
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         player.vc_viewDidAppear()
@@ -279,8 +287,10 @@ class YDVideoDraggingProgressPopView: UIView, SJDraggingProgressPopViewProtocol 
             } else if dragProgressTime < oldValue {
                 directionImageView.image = sources.forwardImage
             }
-            
-            dragProgressTimeLabel.text = NSString.init(currentTime: dragProgressTime, duration: duration) as String
+            let str = NSString.init(currentTime: dragProgressTime, duration: duration)
+             
+            dragProgressTimeLabel.text = str as String
+            print("didset = ", str)
         }
     }
     
