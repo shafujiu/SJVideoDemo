@@ -7,13 +7,48 @@
 
 import UIKit
 import SJVideoPlayer
+//import SJBaseVideoPlayer
 
 class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlLayer {
-
     
     /// 是否竖屏时隐藏返回按钮
-    var hiddenBackButtonWhenOrientationIsPortrait: Bool = false
+    private var hiddenBackButtonWhenOrientationIsPortrait: Bool = false
+    
+    /// 是否竖屏时隐藏标题
+    var isHiddenTitleItemWhenOrientationIsPortrait: Bool = false
+    /// 是否禁止网络状态变化提示
+    var disabledPromptWhenNetworkStatusChanges: Bool = false
+    /// 是否隐藏底部进度条
+    var hiddenBottomProgressIndicator: Bool = false
+    /// 底部进度条高度. default value is 1.0
+    var bottomProgressIndicatorHeight: CGFloat = 1.0
     weak var delegate: SJEdgeControlLayerDelegate?
+    
+    private lazy var lockStateTappedTimerControl: SJTimerControl = {
+        let control = SJTimerControl()
+        control.exeBlock = { [weak self] cont in
+            if let view = self?.leftContainerView {
+                
+                sj_view_makeDisappear(view, true)
+            }
+            cont.clear()
+        }
+        return control
+    }()
+    
+    private lazy var bottomProgressIndicator: SJProgressSlider = {
+        let view = SJProgressSlider()
+        view.pan.isEnabled = false
+        view.trackHeight = bottomProgressIndicatorHeight
+        let sources = SJVideoPlayerSettings.common()
+        
+        let traceColor = sources.bottomIndicator_traceColor ?? sources.progress_traceColor
+        let trackColor = sources.bottomIndicator_trackColor ?? sources.progress_trackColor
+        view.traceImageView.backgroundColor = traceColor
+        view.trackImageView.backgroundColor = trackColor
+
+        return view
+    }()
     
     private lazy var draggingProgressPopView: YDVideoDraggingProgressPopView = {
         let view = YDVideoDraggingProgressPopView()
@@ -25,6 +60,27 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
         let obser = SJDraggingObservation()
         return obser
     }()
+    
+    private lazy var loadingView: YDVideoLoadingView = {
+        let view = YDVideoLoadingView()
+        setLoadingView(view)
+        return view
+    }()
+    
+    private lazy var titleView: SJScrollingTextMarqueeView = {
+        let view = SJScrollingTextMarqueeView()
+        return view
+    }()
+    
+    private var reachabilityObserver: SJReachabilityObserver!
+    
+    @available(iOS 14.0, *)
+    private lazy var pictureInPictureItem: SJEdgeControlButtonItem = {
+        let item = SJEdgeControlButtonItem(tag: SJEdgeControlLayerTopItem_PictureInPicture)
+        item.addTarget(self, action: #selector(pictureInPictureItemWasTapped))
+        return item
+    }()
+    
     
     private var _restarted: Bool = false
     private var videoPlayer: SJBaseVideoPlayer!
@@ -47,131 +103,6 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
     func controlView() -> UIView! {
         self
     }
-    
-    
-    ///
-    /// 当controlView被添加到播放器时, 该方法将会被调用
-    ///
-    func installedControlView(to videoPlayer: SJBaseVideoPlayer!) {
-        self.videoPlayer = videoPlayer
-        // 将返回 交给video
-        self.delegate = videoPlayer as? SJEdgeControlLayerDelegate
-//        sj_view_makeDisappear(topContainerView, false)
-        
-    }
-    ///
-    /// 当播放器尝试自动隐藏控制层之前 将会调用这个方法
-    ///
-    func controlLayer(ofVideoPlayerCanAutomaticallyDisappear videoPlayer: SJBaseVideoPlayer!) -> Bool {
-        true
-    }
-    
-    ///
-    /// 当调用播放器的controlLayerNeedAppear时, 播放器将会回调该方法
-    ///
-    func controlLayerNeedAppear(_ videoPlayer: SJBaseVideoPlayer!) {
-        if videoPlayer.isLockedScreen {return}
-        updateAppearStateForContainerViews()
-        _reloadAdaptersIfNeeded()
-        
-//        [self _updateAppearStateForResidentBackButtonIfNeeded];
-//        [self _updateAppearStateForContainerViews];
-//        [self _reloadAdaptersIfNeeded];
-//        [self _updateContentForBottomCurrentTimeItemIfNeeded];
-//        [self _updateContentForBottomProgressSliderItemIfNeeded];
-//        if (@available(iOS 11.0, *)) {
-//            [self _reloadCustomStatusBarIfNeeded];
-//        }
-        
-    }
-    ///
-    /// 当调用播放器的controlLayerNeedDisappear时, 播放器将会回调该方法
-    ///
-    func controlLayerNeedDisappear(_ videoPlayer: SJBaseVideoPlayer!) {
-        if videoPlayer.isLockedScreen {return}
-        
-//        [self _updateAppearStateForResidentBackButtonIfNeeded];
-        updateAppearStateForContainerViews()
-    }
-    
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, prepareToPlay asset: SJVideoPlayerURLAsset!) {
-        
-    }
-    
-    func videoPlayerPlaybackStatusDidChange(_ videoPlayer: SJBaseVideoPlayer!) {
-        
-    }
-    
-    @available(iOS 14.0, *)
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, pictureInPictureStatusDidChange status: SJPictureInPictureStatus) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, currentTimeDidChange currentTime: TimeInterval) {
-//        [self _updateContentForBottomCurrentTimeItemIfNeeded];
-//        [self _updateContentForBottomProgressIndicatorIfNeeded];
-//        [self _updateContentForBottomProgressSliderItemIfNeeded];
-        updateCurrentTimeForDraggingProgressPopViewIfNeeded()
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, durationDidChange duration: TimeInterval) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, playbackTypeDidChange playbackType: SJPlaybackType) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, willRotateView isFull: Bool) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, didEndRotation isFull: Bool) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, willFitOnScreen isFitOnScreen: Bool) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, gestureRecognizerShouldTrigger type: SJPlayerGestureType, location: CGPoint) -> Bool {
-        true
-    }
-    
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, panGestureTriggeredInTheHorizontalDirection state: SJPanGestureRecognizerState, progressTime: TimeInterval) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, longPressGestureStateDidChange state: SJLongPressGestureRecognizerState) {
-        
-    }
-    /// 这是一个只有在播放器锁屏状态下, 才会回调的方法
-    /// 当播放器锁屏后, 用户每次点击都会回调这个方法
-    func tappedPlayer(onTheLockedState videoPlayer: SJBaseVideoPlayer!) {
-        
-    }
-    
-    
-    func lockedVideoPlayer(_ videoPlayer: SJBaseVideoPlayer!) {
-        
-    }
-    
-    func unlockedVideoPlayer(_ videoPlayer: SJBaseVideoPlayer!) {
-        
-    }
-    
-    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, reachabilityChanged status: SJNetworkStatus) {
-    
-    }
-    
-    var restarted: Bool {
-        _restarted
-    }
-    
-    
-    
     ///
     /// 控制层入场
     ///     当播放器将要切换到此控制层时, 该方法将会被调用
@@ -184,10 +115,8 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
         
         updateAppearStateForContainerViews()
         _reloadAdaptersIfNeeded()
-        
+        _showOrHiddenLoadingView()
 //        [self _showOrHiddenLoadingView];
-//        [self _updateAppearStateForContainerViews];
-//        [self _reloadAdaptersIfNeeded];
     }
     
     ///
@@ -204,11 +133,288 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
             }
         }
     }
+    ///
+    /// 当controlView被添加到播放器时, 该方法将会被调用
+    ///
+    func installedControlView(to videoPlayer: SJBaseVideoPlayer!) {
+        self.videoPlayer = videoPlayer
+        // 将返回 交给video
+        self.delegate = videoPlayer as? SJEdgeControlLayerDelegate
+        _showOrRemoveBottomProgressIndicator()
+        
+        sj_view_makeDisappear(topContainerView, false)
+        sj_view_makeDisappear(leftContainerView, false)
+        sj_view_makeDisappear(bottomContainerView, false)
+        sj_view_makeDisappear(rightContainerView, false)
+        sj_view_makeDisappear(centerContainerView, false)
+        
+        _reloadSizeForBottomTimeLabel()
+        _updateContentForBottomCurrentTimeItemIfNeeded()
+        _updateContentForBottomDurationItemIfNeeded()
+        
+        reachabilityObserver = videoPlayer.reachability.getObserver()
+        reachabilityObserver.networkSpeedDidChangeExeBlock = { [weak self] r in
+            self?._updateNetworkSpeedStrForLoadingView()
+        }
+    }
+    ///
+    /// 当播放器尝试自动隐藏控制层之前 将会调用这个方法
+    ///
+    func controlLayer(ofVideoPlayerCanAutomaticallyDisappear videoPlayer: SJBaseVideoPlayer!) -> Bool {
+        let  progressItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Progress)
+        let slider = progressItem?.customView as? SJProgressSlider
+        return !(slider?.isDragging ?? false)
+    }
+    
+    ///
+    /// 当调用播放器的controlLayerNeedAppear时, 播放器将会回调该方法
+    ///
+    func controlLayerNeedAppear(_ videoPlayer: SJBaseVideoPlayer!) {
+        if videoPlayer.isLockedScreen {return}
+        updateAppearStateForContainerViews()
+        _reloadAdaptersIfNeeded()
+        
+        //        [self _updateAppearStateForResidentBackButtonIfNeeded];
+        _updateContentForBottomCurrentTimeItemIfNeeded()
+        _updateContentForBottomProgressSliderItemIfNeeded()
+        
+        if #available(iOS 11.0, *) {
+            _reloadCustomStatusBarIfNeeded()
+        }
+    }
+    ///
+    /// 当调用播放器的controlLayerNeedDisappear时, 播放器将会回调该方法
+    ///
+    func controlLayerNeedDisappear(_ videoPlayer: SJBaseVideoPlayer!) {
+        if videoPlayer.isLockedScreen {return}
+        
+//        [self _updateAppearStateForResidentBackButtonIfNeeded];
+        updateAppearStateForContainerViews()
+    }
+    
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, prepareToPlay asset: SJVideoPlayerURLAsset!) {
+        
+        _reloadSizeForBottomTimeLabel()
+        _updateContentForBottomDurationItemIfNeeded()
+        _updateContentForBottomCurrentTimeItemIfNeeded()
+        _updateContentForBottomProgressSliderItemIfNeeded()
+        _updateContentForBottomProgressIndicatorIfNeeded()
+//        [self _updateAppearStateForResidentBackButtonIfNeeded];
+        _reloadAdaptersIfNeeded()
+        _showOrHiddenLoadingView()
+    }
+    
+    func videoPlayerPlaybackStatusDidChange(_ videoPlayer: SJBaseVideoPlayer!) {
+        _reloadAdaptersIfNeeded()
+        _showOrHiddenLoadingView()
+        
+        if videoPlayer.isPlaybackFinished {
+            _updateContentForBottomCurrentTimeItemIfNeeded()
+        }
+    }
+    
+    @available(iOS 14.0, *)
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, pictureInPictureStatusDidChange status: SJPictureInPictureStatus) {
+        _updateContentForPictureInPictureItem()
+        topAdapter.reload()
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, currentTimeDidChange currentTime: TimeInterval) {
+        _updateContentForBottomCurrentTimeItemIfNeeded()
+        _updateContentForBottomProgressIndicatorIfNeeded()
+        _updateContentForBottomProgressSliderItemIfNeeded()
+        updateCurrentTimeForDraggingProgressPopViewIfNeeded()
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, durationDidChange duration: TimeInterval) {
+        _reloadSizeForBottomTimeLabel()
+        _updateContentForBottomDurationItemIfNeeded()
+        _updateContentForBottomProgressIndicatorIfNeeded()
+        _updateContentForBottomProgressSliderItemIfNeeded()
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, playableDurationDidChange duration: TimeInterval) {
+        _updateContentForBottomProgressSliderItemIfNeeded()
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, playbackTypeDidChange playbackType: SJPlaybackType) {
+        let currentTimeItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_CurrentTime)
+        
+        let separatorItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Separator)
+        let durationTimeItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_DurationTime)
+        let progressItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Progress)
+        let liveItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_LIVEText)
+        switch ( playbackType ) {
+            case SJPlaybackTypeLIVE:
+                
+                currentTimeItem?.isHidden = true
+                separatorItem?.isHidden = true
+                durationTimeItem?.isHidden = true
+                progressItem?.isHidden = true
+                liveItem?.isHidden = false
+           
+            case SJPlaybackTypeUnknown, SJPlaybackTypeVOD, SJPlaybackTypeFILE:
+            
+                currentTimeItem?.isHidden = false
+                separatorItem?.isHidden = false
+                durationTimeItem?.isHidden = false
+                progressItem?.isHidden = false
+                liveItem?.isHidden = true
+                bottomAdapter.removeItem(forTag: SJEdgeControlLayerBottomItem_LIVEText)
+            
+                
+        default:
+            break
+        }
+        bottomAdapter.reload()
+        _showOrRemoveBottomProgressIndicator()
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, willRotateView isFull: Bool) {
+        updateAppearStateForContainerViews()
+        _reloadAdaptersIfNeeded()
+        
+        if !sj_view_isDisappeared(bottomProgressIndicator) {
+            sj_view_makeDisappear(bottomProgressIndicator, false)
+        }
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, didEndRotation isFull: Bool) {
+        if !videoPlayer.isControlLayerAppeared {
+            sj_view_makeAppear(bottomProgressIndicator, true)
+        }
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, willFitOnScreen isFitOnScreen: Bool) {
+        
+        updateAppearStateForContainerViews()
+        _reloadAdaptersIfNeeded()
+        
+        if !sj_view_isDisappeared(bottomProgressIndicator) {
+            sj_view_makeDisappear(bottomProgressIndicator, false)
+        }
+    }
+    /// 是否可以触发播放器的手势
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, gestureRecognizerShouldTrigger type: SJPlayerGestureType, location: CGPoint) -> Bool {
+        
+        var adapterT: SJEdgeControlButtonItemAdapter? = nil
+        func _locationInTheView(_ container: UIView)->Bool {
+            container.frame.contains(location) && !sj_view_isDisappeared(container)
+        }
+        
+        if _locationInTheView(topContainerView) {
+            adapterT = topAdapter
+        } else if _locationInTheView(bottomContainerView) {
+            adapterT = bottomAdapter
+        }
+        else if _locationInTheView(leftContainerView) {
+            adapterT = leftAdapter
+        }
+        else if _locationInTheView(rightContainerView) {
+            adapterT = rightAdapter
+        }
+        else if _locationInTheView(centerContainerView) {
+            adapterT = centerAdapter
+        }
+        guard let adapter = adapterT else {
+            return true
+        }
+        
+        let point = controlView()?.convert(location, to: adapter.view) ?? .zero
+        if !adapter.view.frame.contains(point) {return true}
+        
+        let item = adapter.item(at: point)
+        if let _ = item?.action {
+            return false
+        } else {
+            return true
+        }
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, panGestureTriggeredInTheHorizontalDirection state: SJPanGestureRecognizerState, progressTime: TimeInterval) {
+        switch ( state ) {
+            case SJPanGestureRecognizerStateBegan:
+                _willBeginDragging()
+            case SJPanGestureRecognizerStateChanged:
+                _didMove(progressTime: progressTime)
+            case SJPanGestureRecognizerStateEnded:
+               _endDragging()
+        default:
+            break
+        }
+    }
+    // 长按快进 未实现
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, longPressGestureStateDidChange state: SJLongPressGestureRecognizerState) {
+        
+    }
+    /// 这是一个只有在播放器锁屏状态下, 才会回调的方法
+    /// 当播放器锁屏后, 用户每次点击都会回调这个方法
+    func tappedPlayer(onTheLockedState videoPlayer: SJBaseVideoPlayer!) {
+        if sj_view_isDisappeared(leftContainerView)  {
+            sj_view_makeAppear(leftContainerView, true)
+            lockStateTappedTimerControl.start()
+        } else {
+            sj_view_makeDisappear(leftContainerView, true)
+            lockStateTappedTimerControl.clear()
+        }
+    }
+    
+    
+    func lockedVideoPlayer(_ videoPlayer: SJBaseVideoPlayer!) {
+        updateAppearStateForContainerViews()
+        _reloadAdaptersIfNeeded()
+        lockStateTappedTimerControl.start()
+    }
+    
+    func unlockedVideoPlayer(_ videoPlayer: SJBaseVideoPlayer!) {
+        lockStateTappedTimerControl.clear()
+        videoPlayer.controlLayerNeedAppear()
+    }
+    
+    func videoPlayer(_ videoPlayer: SJBaseVideoPlayer!, reachabilityChanged status: SJNetworkStatus) {
+        if #available(iOS 11.0, *) {
+            _reloadCustomStatusBarIfNeeded()
+        }
+        if disabledPromptWhenNetworkStatusChanges {return}
+        if videoPlayer.assetURL?.isFileURL ?? false {return} // return when is local video.
+        switch  status  {
+        
+        case .notReachable:
+            let attr = NSAttributedString.sj_UIKitText { (make) in
+                let _ = make.append(SJVideoPlayerSettings.common().unstableNetworkPrompt ?? "").textColor(.white)
+            }
+            videoPlayer.prompt.show(attr, duration: 3)
+            
+        case .reachableViaWWAN:
+            let attr = NSAttributedString.sj_UIKitText { (make) in
+                let _ = make.append(SJVideoPlayerSettings.common().cellularNetworkPrompt ?? "").textColor(.white)
+            }
+            videoPlayer.prompt.show(attr, duration: 3)
+            
+            
+        case .reachableViaWiFi:
+            break
+        @unknown default:
+            break
+        }
+    }
+    
+    var restarted: Bool {
+        _restarted
+    }
     
 }
 // MARK: -
+
 extension SJCustomControlLayerViewController {
-    
+    private func setLoadingView(_ view: SJLoadingViewProtocol) {
+        let loadV = view as! UIView
+        controlView()?.addSubview(loadV)
+        loadV.snp.makeConstraints { (make) in
+            make.center.equalToSuperview()
+        }
+    }
 }
 
 // MARK: - setupSubViews
@@ -236,6 +442,8 @@ extension SJCustomControlLayerViewController {
         backItem.addTarget(self, action: #selector(_backItemWasTapped))
         topAdapter.add(backItem)
         
+        let titleItem = SJEdgeControlButtonItem.placeholder(with: SJButtonItemPlaceholderType_49xFill, tag: SJEdgeControlLayerTopItem_Title)
+        topAdapter.add(titleItem)
         topAdapter.reload()
     }
     
@@ -271,14 +479,14 @@ extension SJCustomControlLayerViewController {
         let currentTimeItem = SJEdgeControlButtonItem.placeholder(withSize: 8, tag: SJEdgeControlLayerBottomItem_CurrentTime)
         bottomAdapter.add(currentTimeItem)
         // 时间分隔符
-//        SJEdgeControlButtonItem *separatorItem = [[SJEdgeControlButtonItem alloc] initWithTitle:[NSAttributedString sj_UIKitText:^(id<SJUIKitTextMakerProtocol>  _Nonnull make) {
-//            make.append(@"/ ").font([UIFont systemFontOfSize:11]).textColor([UIColor whiteColor]).alignment(NSTextAlignmentCenter);
-//        }] target:nil action:NULL tag:SJEdgeControlLayerBottomItem_Separator];
-//        [self.bottomAdapter addItem:separatorItem];
-//
-//        // 全部时长
-//        SJEdgeControlButtonItem *durationTimeItem = [SJEdgeControlButtonItem placeholderWithSize:8 tag:SJEdgeControlLayerBottomItem_DurationTime];
-//        [self.bottomAdapter addItem:durationTimeItem];
+        let attr = NSAttributedString.sj_UIKitText({ (make) in
+            _ = make.append("/").font(UIFont.systemFont(ofSize: 9, weight: .heavy)).textColor(UIColor.white).alignment(.center)
+        })
+        let separatorItem = SJEdgeControlButtonItem(title: attr, target: nil, action: nil, tag: SJEdgeControlLayerBottomItem_Separator)
+        bottomAdapter.add(separatorItem)
+        // 全部时长
+        let durationTimeItem = SJEdgeControlButtonItem.placeholder(withSize: 8, tag: SJEdgeControlLayerBottomItem_DurationTime)
+        bottomAdapter.add(durationTimeItem)
         // 全屏按钮
         let fullItem = SJEdgeControlButtonItem.placeholder(with: SJButtonItemPlaceholderType_49x49, tag: SJEdgeControlLayerBottomItem_FullBtn)
         fullItem.resetAppearIntervalWhenPerformingItemAction = false
@@ -289,7 +497,11 @@ extension SJCustomControlLayerViewController {
     }
     
     private func _addItemsToLeftAdapter() {
+        let lockItem = SJEdgeControlButtonItem.placeholder(with: SJButtonItemPlaceholderType_49x49, tag: SJEdgeControlLayerLeftItem_Lock)
+        lockItem.addTarget(self, action: #selector(_lockItemWasTapped))
         
+        leftAdapter.add(lockItem)
+        leftAdapter.reload()
     }
     
     private func _addItemsToRightAdapter() {
@@ -297,7 +509,11 @@ extension SJCustomControlLayerViewController {
     }
     
     private func _addItemsToCenterAdapter() {
-        
+        let replayLabel = UILabel()
+        replayLabel.numberOfLines = 0
+        let replayItem = SJEdgeControlButtonItem.frameLayout(withCustomView: replayLabel, tag: SJEdgeControlLayerCenterItem_Replay)
+        centerAdapter.add(replayItem)
+        centerAdapter.reload()
     }
     
     // MARK: - item actions
@@ -312,6 +528,23 @@ extension SJCustomControlLayerViewController {
     @objc private func _fullItemWasTapped() {
         videoPlayer.useFitOnScreenAndDisableRotation ? videoPlayer.isFitOnScreen = !videoPlayer.isFitOnScreen : videoPlayer.rotate()
     }
+    
+    @objc private func _lockItemWasTapped() {
+        videoPlayer.isLockedScreen = !videoPlayer.isLockedScreen
+    }
+    
+    @available(iOS 14.0, *)
+    @objc private func pictureInPictureItemWasTapped() {
+        switch videoPlayer.playbackController.pictureInPictureStatus {
+        case .starting, .running:
+            videoPlayer.playbackController.stopPictureInPicture()
+        case .unknown, .stopping, .stopped:
+            videoPlayer.playbackController.startPictureInPicture()
+        @unknown default:
+            break
+        }
+    }
+
 }
 
 // MARK: - appear state
@@ -383,11 +616,7 @@ extension SJCustomControlLayerViewController {
         
     }
     
-    private func updateCurrentTimeForDraggingProgressPopViewIfNeeded() {
-        if !sj_view_isDisappeared(draggingProgressPopView) {
-            draggingProgressPopView.currentTime = videoPlayer.currentTime
-        }
-    }
+   
 }
 
 // MARK: - update items
@@ -428,32 +657,26 @@ extension SJCustomControlLayerViewController {
                 backItem.image = sources.backBtnImage
             }
         }
-        
-        // title item
-        //        {
-        //            SJEdgeControlButtonItem *titleItem = [self.topAdapter itemForTag:SJEdgeControlLayerTopItem_Title];
-        //            if ( titleItem != nil ) {
-        //                if ( self.isHiddenTitleItemWhenOrientationIsPortrait && isSmallscreen ) {
-        //                    titleItem.hidden = YES;
-        //                }
-        //                else {
-        //                    if ( titleItem.customView != self.titleView )
-        //                        titleItem.customView = self.titleView;
-        //                    SJVideoPlayerURLAsset *asset = _videoPlayer.URLAsset.original ?: _videoPlayer.URLAsset;
-        //                    NSAttributedString *_Nullable attributedTitle = asset.attributedTitle;
-        //                    self.titleView.attributedText = attributedTitle;
-        //                    titleItem.hidden = (attributedTitle.length == 0);
-        //                }
-        //
-        //                if ( titleItem.hidden == NO ) {
-        //                    // margin
-        //                    NSInteger atIndex = [_topAdapter indexOfItemForTag:SJEdgeControlLayerTopItem_Title];
-        //                    CGFloat left  = [_topAdapter isHiddenWithRange:NSMakeRange(0, atIndex)] ? 16 : 0;
-        //                    CGFloat right = [_topAdapter isHiddenWithRange:NSMakeRange(atIndex, _topAdapter.numberOfItems)] ? 16 : 0;
-        //                    titleItem.insets = SJEdgeInsetsMake(left, right);
-        //                }
-        //            }
-        //        }
+               
+        if let titleItem = topAdapter.item(forTag: SJEdgeControlLayerTopItem_Title){
+            if isHiddenTitleItemWhenOrientationIsPortrait, isSmallscreen {
+                titleItem.isHidden = true
+            } else {
+                titleItem.customView = titleView
+                let asset = videoPlayer.urlAsset?.original ?? videoPlayer.urlAsset
+                let attributeTitle = asset?.attributedTitle
+                titleView.attributedText = attributeTitle
+                titleItem.isHidden = (attributeTitle?.length == 0)
+            }
+            
+            if !titleItem.isHidden {
+                let atIndex = topAdapter.indexOfItem(forTag: SJEdgeControlLayerTopItem_Title)
+                let left = topAdapter.isHidden(with: NSRange(location: 0, length: atIndex)) ? 16 : 0
+                let right = topAdapter.isHidden(with: NSRange(location: atIndex, length: topAdapter.numberOfItems)) ? 16 : 0
+                
+                titleItem.insets = SJEdgeInsets(front: CGFloat(left), rear: CGFloat(right))
+            }
+        }
         
         topAdapter.reload()
     }
@@ -501,26 +724,7 @@ extension SJCustomControlLayerViewController {
             fullItem.image = (isFullscreen || isFitOnScreen) ? sources.shrinkscreenImage : sources.fullBtnImage
         }
         
-        //
-        //        // live text
-        //        {
-        //            SJEdgeControlButtonItem *liveItem = [self.bottomAdapter itemForTag:SJEdgeControlLayerBottomItem_LIVEText];
-        //            if ( liveItem != nil && liveItem.hidden == NO ) {
-        //                liveItem.title = [NSAttributedString sj_UIKitText:^(id<SJUIKitTextMakerProtocol>  _Nonnull make) {
-        //                    make.append(sources.liveText);
-        //                    make.font(sources.titleFont);
-        //                    make.textColor(sources.titleColor);
-        //                    make.shadow(^(NSShadow * _Nonnull make) {
-        //                        make.shadowOffset = CGSizeMake(0, 0.5);
-        //                        make.shadowColor = UIColor.blackColor;
-        //                    });
-        //                }];
-        //            }
-        //        }
-        
         bottomAdapter.reload()
-        
-        
     }
     
     private func _reloadRightAdapterIfNeeded() {
@@ -531,17 +735,131 @@ extension SJCustomControlLayerViewController {
         
     }
     
+    private func _updateContentForBottomCurrentTimeItemIfNeeded() {
+        if sj_view_isDisappeared(bottomContainerView) {
+            return
+        }
+        let currentTimeStr = videoPlayer.string(forSeconds: Int(videoPlayer.currentTime))
+     
+        if let currentTimeItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_CurrentTime), currentTimeItem.isHidden == false {
+            currentTimeItem.title = _textForTimeString(timeStr: currentTimeStr)
+            bottomAdapter.updateContentForItem(withTag: SJEdgeControlLayerBottomItem_CurrentTime)
+        }
+    }
+    
+    private func _updateContentForBottomDurationItemIfNeeded() {
+        if let durationTimeItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_DurationTime), durationTimeItem.isHidden == false {
+            durationTimeItem.title = _textForTimeString(timeStr: videoPlayer.string(forSeconds: Int(videoPlayer.duration)))
+            bottomAdapter.updateContentForItem(withTag: SJEdgeControlLayerBottomItem_CurrentTime)
+        }
+    }
+    
+    private func _reloadSizeForBottomTimeLabel() {
+        // 00:00
+        // 00:00:00
+        let ms = "00:00"
+        let hms = "00:00:00"
+        let durationTimeStr = videoPlayer.string(forSeconds: Int(videoPlayer.duration))
+            
+        let format = (durationTimeStr.count == ms.count) ? ms : hms
+        
+        let formatSize = _textForTimeString(timeStr: format).sj_textSize()
+        
+        guard let currentTimeItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_CurrentTime),
+              let durationTimeItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_DurationTime) else {
+            return
+        }
+    
+        currentTimeItem.size = formatSize.width
+        durationTimeItem.size = formatSize.width
+        bottomAdapter.reload()
+    }
+    
+    private func _updateContentForBottomProgressSliderItemIfNeeded() {
+        if !sj_view_isDisappeared(bottomContainerView) {
+            let progressItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Progress)
+            guard let slider = progressItem?.customView as? SJProgressSlider else {
+                return
+            }
+            slider.maxValue = CGFloat(videoPlayer.duration)
+            if !slider.isDragging {slider.value = CGFloat(videoPlayer.currentTime)}
+            slider.bufferProgress = CGFloat(videoPlayer.playableDuration) / slider.maxValue
+        }
+    }
+
+    private func _updateContentForBottomProgressIndicatorIfNeeded() {
+        if !sj_view_isDisappeared(bottomProgressIndicator) {
+            bottomProgressIndicator.value = CGFloat(videoPlayer.currentTime)
+            bottomProgressIndicator.maxValue = CGFloat(videoPlayer.duration)
+        }
+    }
+    
+    private func updateCurrentTimeForDraggingProgressPopViewIfNeeded() {
+        if !sj_view_isDisappeared(draggingProgressPopView) {
+            draggingProgressPopView.currentTime = videoPlayer.currentTime
+        }
+    }
+    
+    private func _updateNetworkSpeedStrForLoadingView() {
+        if !loadingView.isAnimating {return}
+        if loadingView.showNetworkSpeed && !(videoPlayer.assetURL?.isFileURL ?? false) {
+            loadingView.networkSpeedStr = NSAttributedString.sj_UIKitText({ (make) in
+                _ = make.append(self.videoPlayer.reachability.networkSpeedStr).font(UIFont.systemFont(ofSize: 14, weight: .regular)).textColor(.white).alignment(.center)
+                
+            })
+        }else {
+            loadingView.networkSpeedStr = nil
+        }
+    }
+    // FIXME: - _reloadCustomStatusBarIfNeeded
+    @available(iOS 11.0, *)
+    private func _reloadCustomStatusBarIfNeeded() {
+        
+    }
+    
+    @available(iOS 14.0, *)
+    private func _updateContentForPictureInPictureItem() {
+        let sources = SJVideoPlayerSettings.common()
+        switch videoPlayer.playbackController.pictureInPictureStatus {
+        case .running:
+                self.pictureInPictureItem.image = sources.pictureInPictureItemStopImage;
+                break;
+        case .unknown, .starting, .stopping, .stopped:
+
+                self.pictureInPictureItem.image = sources.pictureInPictureItemStartImage;
+                
+        @unknown default:
+            break
+        }
+    }
+    
     // MARK: - progress
     private func updateForDraggingProgressPopView(_ view: YDVideoDraggingProgressPopView) {
         
         view.duration = videoPlayer.duration
         view.currentTime = videoPlayer.currentTime
         view.dragProgressTime = videoPlayer.currentTime
-        print("videoPlayer.currentTime", videoPlayer.currentTime)
     }
     
     private func _updateForDraggingProgressPopView() {
         updateForDraggingProgressPopView(draggingProgressPopView)
+    }
+    
+    private func _showOrHiddenLoadingView() {
+        if videoPlayer == nil || videoPlayer.urlAsset == nil {
+            loadingView.stop()
+            return
+        }
+        if videoPlayer.isPaused {
+            loadingView.stop()
+        } else if videoPlayer.assetStatus == .preparing {
+            loadingView.start()
+        } else if videoPlayer.assetStatus == .failed {
+            loadingView.stop()
+        } else if videoPlayer.assetStatus == .readyToPlay {
+            videoPlayer.reasonForWaitingToPlay == SJWaitingToMinimizeStallsReason ? loadingView.start() : loadingView.stop()
+        }
+        
     }
     
     private func _willBeginDragging() {
@@ -560,6 +878,7 @@ extension SJCustomControlLayerViewController {
     private func _didMove(progressTime: TimeInterval) {
         print("progressTime = ", progressTime)
         draggingProgressPopView.dragProgressTime = progressTime
+        
         // 是否生成预览图 没实现
         draggingObserver.didMoveExeBlock?(draggingProgressPopView.dragProgressTime)
     }
@@ -578,21 +897,7 @@ extension SJCustomControlLayerViewController {
     }
 }
 
-// MARK: -
-extension SJCustomControlLayerViewController {
-    /// 此处为重置控制层的隐藏间隔.(如果点击到当前控制层上的item, 则重置控制层的隐藏间隔)
-    @objc private func _resetControlLayerAppearIntervalForItemIfNeeded(note: Notification) {
-        let item = note.object as! SJEdgeControlButtonItem
-        if ( item.resetAppearIntervalWhenPerformingItemAction ) {
-            if ( topAdapter.contains(item) ||
-                leftAdapter.contains(item) ||
-                bottomAdapter.contains(item) ||
-                rightAdapter.contains(item)) {
-                videoPlayer.controlLayerNeedAppear()
-            }
-        }
-    }
-}
+
 // MARK: - SJProgressSliderDelegate
 extension SJCustomControlLayerViewController: SJProgressSliderDelegate {
     func sliderWillBeginDragging(_ slider: SJProgressSlider) {
@@ -608,11 +913,46 @@ extension SJCustomControlLayerViewController: SJProgressSliderDelegate {
     }
     
     func slider(_ slider: SJProgressSlider, valueDidChange value: CGFloat) {
-        print("value = ", value)
         if slider.isDragging {self._didMove(progressTime: TimeInterval(value))}
     }
     
     func sliderDidEndDragging(_ slider: SJProgressSlider) {
         _endDragging()
+    }
+}
+
+// MARK: -
+extension SJCustomControlLayerViewController {
+    
+    private func _textForTimeString(timeStr: String) ->NSAttributedString {
+        let source = SJVideoPlayerSettings.common()
+        return NSAttributedString.sj_UIKitText { (make) in
+           _ =  make.append(timeStr).font(source.timeFont ?? UIFont.systemFont(ofSize: 9, weight: .heavy)).textColor(.white).alignment(.center)
+        }
+    }
+
+    /// 此处为重置控制层的隐藏间隔.(如果点击到当前控制层上的item, 则重置控制层的隐藏间隔)
+    @objc private func _resetControlLayerAppearIntervalForItemIfNeeded(note: Notification) {
+        let item = note.object as! SJEdgeControlButtonItem
+        if ( item.resetAppearIntervalWhenPerformingItemAction ) {
+            if ( topAdapter.contains(item) ||
+                leftAdapter.contains(item) ||
+                bottomAdapter.contains(item) ||
+                rightAdapter.contains(item)) {
+                videoPlayer.controlLayerNeedAppear()
+            }
+        }
+    }
+    
+    private func _showOrRemoveBottomProgressIndicator() {
+        if hiddenBottomProgressIndicator || videoPlayer.playbackType == SJPlaybackTypeLIVE  {
+            bottomProgressIndicator.removeFromSuperview()
+        } else {
+            controlView()?.addSubview(bottomProgressIndicator)
+            bottomProgressIndicator.snp.makeConstraints { (make) in
+                make.left.bottom.right.equalToSuperview()
+                make.height.equalTo(bottomProgressIndicatorHeight)
+            }
+        }
     }
 }

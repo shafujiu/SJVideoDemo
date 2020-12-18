@@ -35,7 +35,7 @@ class ViewController: UIViewController {
         
         player.defaultEdgeControlLayer.loadingView = YDVideoLoadingView()
         
-        player.defaultEdgeControlLayer.fastForwardView = YDVideoFastForwardView()
+//        player.defaultEdgeControlLayer.fastForwardView = YDVideoFastForwardView()
         
         
         
@@ -75,6 +75,9 @@ class ViewController: UIViewController {
         let asset = SJVideoPlayerURLAsset(url: URL(string: url)!)
         player.urlAsset = asset
         player.view.backgroundColor = .orange
+        asset?.attributedTitle = NSAttributedString.sj_UIKitText({ (make) in
+            let _ = make.append("这是视频的title").textColor(.white)
+        })
         player.view.frame = CGRect(x: 0, y: 0, width: 300, height: 200)
         self.view.addSubview(player.view)
         
