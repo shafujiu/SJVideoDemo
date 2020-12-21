@@ -21,39 +21,39 @@ class ViewController: UIViewController {
         
         addCustomControlLayerToSwitcher()
         
-        let bottomAdapter = player.defaultEdgeControlLayer.bottomAdapter
+//        let bottomAdapter = player.defaultEdgeControlLayer.bottomAdapter
         
-        let progressItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Progress)!
-        progressItem.insets = SJEdgeInsets(front: -4, rear: 8)
+//        let progressItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Progress)!
+//        progressItem.insets = SJEdgeInsets(front: -4, rear: 8)
         // 进度条
-        let slider = progressItem.customView as? SJProgressSlider
-        slider?.setThumbCornerRadius(4, size: CGSize(width: 8, height: 8), thumbBackgroundColor: #colorLiteral(red: 0.9672872424, green: 0.6626139879, blue: 0.09413511306, alpha: 1))
+//        let slider = progressItem.customView as? SJProgressSlider
+//        slider?.setThumbCornerRadius(4, size: CGSize(width: 8, height: 8), thumbBackgroundColor: #colorLiteral(red: 0.9672872424, green: 0.6626139879, blue: 0.09413511306, alpha: 1))
         
 //        SJEdgeControlButtonItem
-        let fullitem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_FullBtn)
-        fullitem?.placeholderType
+//        let fullitem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_FullBtn)
+//        fullitem?.placeholderType
         
-        player.defaultEdgeControlLayer.loadingView = YDVideoLoadingView()
+//        player.defaultEdgeControlLayer.loadingView = YDVideoLoadingView()
         
 //        player.defaultEdgeControlLayer.fastForwardView = YDVideoFastForwardView()
         
         
         
-        player.defaultEdgeControlLayer.draggingProgressPopView = YDVideoDraggingProgressPopView()
+//        player.defaultEdgeControlLayer.draggingProgressPopView = YDVideoDraggingProgressPopView()
         
-        SJVideoPlayer.update { commonSettings in
-            commonSettings.pauseBtnImage = UIImage(named: "icon_v_stop")
-            commonSettings.playBtnImage = UIImage(named: "icon_v_play")
-            
-            commonSettings.fullBtnImage = UIImage(named: "icon_full_screen")
-            commonSettings.shrinkscreenImage = nil
-            commonSettings.forwardImage = UIImage(named: "icon_forward")
-            commonSettings.fastImage = UIImage(named: "icon_fast")
-            
-            commonSettings.progress_trackColor = #colorLiteral(red: 0.29461658, green: 0.2946640551, blue: 0.2946062088, alpha: 1)
-            commonSettings.progress_traceHeight = 2
-            commonSettings.progress_traceColor = #colorLiteral(red: 0.9672872424, green: 0.6626139879, blue: 0.09413511306, alpha: 1)
-        }
+//        SJVideoPlayer.update { commonSettings in
+//            commonSettings.pauseBtnImage = UIImage(named: "icon_v_stop")
+//            commonSettings.playBtnImage = UIImage(named: "icon_v_play")
+//
+//            commonSettings.fullBtnImage = UIImage(named: "icon_full_screen")
+//            commonSettings.shrinkscreenImage = nil
+//            commonSettings.forwardImage = UIImage(named: "icon_forward")
+//            commonSettings.fastImage = UIImage(named: "icon_fast")
+//
+//            commonSettings.progress_trackColor = #colorLiteral(red: 0.29461658, green: 0.2946640551, blue: 0.2946062088, alpha: 1)
+//            commonSettings.progress_traceHeight = 2
+//            commonSettings.progress_traceColor = #colorLiteral(red: 0.9672872424, green: 0.6626139879, blue: 0.09413511306, alpha: 1)
+//        }
         
        
         
@@ -62,11 +62,11 @@ class ViewController: UIViewController {
         
         
         
-        bottomAdapter.removeItem(forTag: SJEdgeControlLayerBottomItem_Progress)
-        bottomAdapter.insert(progressItem, at: 1)
-        bottomAdapter.reload()
+//        bottomAdapter.removeItem(forTag: SJEdgeControlLayerBottomItem_Progress)
+//        bottomAdapter.insert(progressItem, at: 1)
+//        bottomAdapter.reload()
         
-        let playItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Play)
+//        let playItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Play)
         
         let controller = SJIJKMediaPlaybackController()
         controller.options = IJKFFOptions.byDefault()
@@ -80,9 +80,6 @@ class ViewController: UIViewController {
         })
         player.view.frame = CGRect(x: 0, y: 0, width: 300, height: 200)
         self.view.addSubview(player.view)
-        
-        
-        
         
     }
 
@@ -146,14 +143,15 @@ class YDVideoLoadingView: UIView, SJLoadingViewProtocol {
     
     private func setupSubViews() {
         
-        backgroundColor = UIColor.black.withAlphaComponent(0.8)
+//        backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        backgroundColor = .clear
         layer.cornerRadius = 4
         addSubview(activityView)
         addSubview(titleLbl)
         activityView.snp.makeConstraints { (make) in
-            make.left.equalToSuperview().offset(36)
-            make.right.equalToSuperview().offset(-36)
-            make.top.equalToSuperview().offset(20)
+            make.left.equalToSuperview()
+            make.right.equalToSuperview()
+            make.top.equalToSuperview()
             make.bottom.equalToSuperview().offset(-52)
             make.width.height.equalTo(40)
         }
@@ -190,148 +188,6 @@ class YDVideoLoadingView: UIView, SJLoadingViewProtocol {
             self.activityView.stopAnimating()
         }
     }
-}
-
-
-class YDVideoDraggingProgressPopView: UIView, SJDraggingProgressPopViewProtocol {
-    
-    private lazy var contentView: UIView = {
-        let view = UIView()
-        view.layer.cornerRadius = 8
-        view.backgroundColor = UIColor.black.withAlphaComponent(0.8)
-        return view
-    }()
-    
-    private lazy var directionImageView: UIImageView = {
-        let view = UIImageView()
-        view.contentMode = .scaleAspectFit
-        return view
-    }()
-    
-    private lazy var dragProgressTimeLabel: UILabel = {
-        let lbl = UILabel()
-        lbl.font = UIFont.systemFont(ofSize: 14)
-        lbl.textColor = .white
-        lbl.textAlignment = .right
-        return lbl
-    }()
-    
-    private lazy var separatorLabel: UILabel = {
-        let lbl = UILabel()
-        lbl.font = UIFont.systemFont(ofSize: 14)
-        lbl.textColor = .white
-        lbl.text = "/"
-        return lbl
-    }()
-    
-    private lazy var durationLabel: UILabel = {
-        let lbl = UILabel()
-        lbl.font = UIFont.systemFont(ofSize: 14)
-        lbl.textColor = .white
-        lbl.textAlignment = .left
-        return lbl
-    }()
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupSubViews()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func setupSubViews() {
-        addSubview(contentView)
-        contentView.addSubview(directionImageView)
-        contentView.addSubview(dragProgressTimeLabel)
-        contentView.addSubview(separatorLabel)
-        contentView.addSubview(durationLabel)
-        
-        contentView.snp.makeConstraints { (make) in
-            make.edges.equalTo(0)
-            make.width.equalTo(120)
-            make.height.equalTo(54)
-        }
-        
-        directionImageView.snp.makeConstraints { (make) in
-            make.top.equalTo(8)
-            make.centerX.equalToSuperview()
-        }
-        
-        separatorLabel.snp.makeConstraints { (make) in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(directionImageView.snp.bottom).offset(2)
-        }
-        
-        dragProgressTimeLabel.snp.makeConstraints { (make) in
-            make.right.equalTo(separatorLabel.snp.left)
-            make.centerY.equalTo(separatorLabel)
-        }
-        
-        durationLabel.snp.makeConstraints { (make) in
-            make.left.equalTo(separatorLabel.snp.right)
-            make.centerY.equalTo(separatorLabel)
-        }
-    }
-    
-    
-    
-    
-    // MARK: - SJDraggingProgressPopViewProtocol
-
-    var style: SJDraggingProgressPopViewStyle = SJDraggingProgressPopViewStyleNormal
-    
-    var dragProgressTime: TimeInterval = 0 {
-        didSet {
-            let sources = SJVideoPlayerSettings.common()
-            if dragProgressTime > oldValue {
-                directionImageView.image = sources.fastImage
-            } else if dragProgressTime < oldValue {
-                directionImageView.image = sources.forwardImage
-            }
-            let str = NSString.init(currentTime: dragProgressTime, duration: duration)
-             
-            dragProgressTimeLabel.text = str as String
-            print("didset = ", str)
-        }
-    }
-    
-    var currentTime: TimeInterval = 0
-    
-    var duration: TimeInterval = 0 {
-        didSet {
-            durationLabel.text = NSString.init(currentTime: duration, duration: duration) as String
-        }
-    }
-    
-    var isPreviewImageHidden: Bool {
-        return style != SJDraggingProgressPopViewStyleFullscreen
-    }
-    
-    var previewImage: UIImage? = nil
-}
-
-
-
-class YDVideoFastForwardView: SJFastForwardView {
-    
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        
-//        setupUI()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    
-//    private func setupUI() {
-//        setValue(<#T##value: Any?##Any?#>, forKey: <#T##String#>)
-//    }
-    
 }
 
 

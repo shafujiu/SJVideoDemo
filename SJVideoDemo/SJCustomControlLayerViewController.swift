@@ -9,6 +9,109 @@ import UIKit
 import SJVideoPlayer
 //import SJBaseVideoPlayer
 
+
+struct YDCustomVideoSettings {
+    
+    static let `default` = YDCustomVideoSettings()
+    /// 轨迹颜色, 走过的痕迹
+    var bottomIndicator_traceColor: UIColor {
+        progress_traceColor
+    }
+    /// 轨迹颜色, 走过的痕迹
+    var progress_traceColor: UIColor {
+        #colorLiteral(red: 1, green: 0.6666666667, blue: 0.0862745098, alpha: 1)
+    }
+    // 轨道颜色
+    var bottomIndicator_trackColor: UIColor {
+        progress_trackColor
+    }
+    // 轨道颜色
+    var progress_trackColor: UIColor {
+        #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0.39)
+    }
+    
+    /// 缓冲颜色
+    var progress_bufferColor: UIColor? {
+        SJVideoPlayerSettings.common().progress_bufferColor
+    }
+    
+    /// 缓冲高度
+    var progress_traceHeight: CGFloat {
+        1.5
+    }
+    
+    // 网络不稳定文案
+    var unstableNetworkPrompt: String {
+        SJVideoPlayerSettings.common().unstableNetworkPrompt ?? "网络不稳定, 请检查网络"
+    }
+    // 非wifi 文案
+    var cellularNetworkPrompt: String {
+        SJVideoPlayerSettings.common().cellularNetworkPrompt ?? "当前非WiFi环境, 请注意流量消耗"
+    }
+    
+    /// 返回图标
+    var backBtnImage: UIImage? {
+        SJVideoPlayerSettings.common().backBtnImage
+    }
+    
+    /// 播放图标
+    var playBtnImage: UIImage? {
+        UIImage(named: "icon_v_play")
+    }
+    
+    /// 暂停图标
+    var pauseBtnImage: UIImage? {
+        UIImage(named: "icon_v_stop")
+    }
+    /// 菊花圈圈的线颜色
+    /// - 默认是白色
+    var loadingLineColor: UIColor {
+        .white
+    }
+    
+    /// 拇指
+    var progress_thumbImage: UIImage? = nil
+    var progress_thumbSize: CGFloat {
+        8
+    }
+    var progress_thumbColor: UIColor {
+        progress_traceColor
+    }
+    // 全屏 -> 缩小
+    var shrinkscreenImage: UIImage? {
+        nil
+    }
+    // 全屏
+    var fullBtnImage: UIImage? {
+        UIImage(named: "icon_full_screen")
+    }
+    @available(iOS 14.0, *)
+    var pictureInPictureItemStopImage: UIImage? {
+        SJVideoPlayerSettings.common().pictureInPictureItemStopImage
+    }
+    @available(iOS 14.0, *)
+    var pictureInPictureItemStartImage: UIImage? {
+        SJVideoPlayerSettings.common().pictureInPictureItemStartImage
+    }
+    // 时间label
+    var timeFont: UIFont {
+        UIFont.systemFont(ofSize: 9, weight: .heavy)
+    }
+    
+    var timeColor: UIColor {
+        .white
+    }
+    
+    // 拖拽弹窗
+    var fastImage: UIImage? {
+        UIImage(named: "icon_fast")
+    }
+    
+    var forwardImage: UIImage? {
+        UIImage(named: "icon_forward")
+    }
+}
+
 class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlLayer {
     
     /// 是否竖屏时隐藏返回按钮
@@ -40,10 +143,9 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
         let view = SJProgressSlider()
         view.pan.isEnabled = false
         view.trackHeight = bottomProgressIndicatorHeight
-        let sources = SJVideoPlayerSettings.common()
-        
-        let traceColor = sources.bottomIndicator_traceColor ?? sources.progress_traceColor
-        let trackColor = sources.bottomIndicator_trackColor ?? sources.progress_trackColor
+        let setting = YDCustomVideoSettings.default
+        let traceColor = setting.bottomIndicator_traceColor
+        let trackColor = setting.bottomIndicator_trackColor
         view.traceImageView.backgroundColor = traceColor
         view.trackImageView.backgroundColor = trackColor
 
@@ -263,7 +365,6 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
                 liveItem?.isHidden = true
                 bottomAdapter.removeItem(forTag: SJEdgeControlLayerBottomItem_LIVEText)
             
-                
         default:
             break
         }
@@ -360,7 +461,6 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
         }
     }
     
-    
     func lockedVideoPlayer(_ videoPlayer: SJBaseVideoPlayer!) {
         updateAppearStateForContainerViews()
         _reloadAdaptersIfNeeded()
@@ -382,16 +482,15 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
         
         case .notReachable:
             let attr = NSAttributedString.sj_UIKitText { (make) in
-                let _ = make.append(SJVideoPlayerSettings.common().unstableNetworkPrompt ?? "").textColor(.white)
+                let _ = make.append(YDCustomVideoSettings.default.unstableNetworkPrompt).textColor(.white)
             }
             videoPlayer.prompt.show(attr, duration: 3)
             
         case .reachableViaWWAN:
             let attr = NSAttributedString.sj_UIKitText { (make) in
-                let _ = make.append(SJVideoPlayerSettings.common().cellularNetworkPrompt ?? "").textColor(.white)
+                let _ = make.append(YDCustomVideoSettings.default.cellularNetworkPrompt).textColor(.white)
             }
             videoPlayer.prompt.show(attr, duration: 3)
-            
             
         case .reachableViaWiFi:
             break
@@ -471,7 +570,9 @@ extension SJCustomControlLayerViewController {
             strongSelf.videoPlayer.seek(toTime: TimeInterval(location), completionHandler: nil)
         }
         let progressItem = SJEdgeControlButtonItem(customView: slider, tag: SJEdgeControlLayerBottomItem_Progress)
-        progressItem.insets = SJEdgeInsetsMake(8, 8)
+//        progressItem.insets = SJEdgeInsetsMake(8, 8)
+        progressItem.insets = SJEdgeInsets(front: -4, rear: 8)
+        
         progressItem.fill = true
         bottomAdapter.add(progressItem)
         
@@ -488,7 +589,7 @@ extension SJCustomControlLayerViewController {
         let durationTimeItem = SJEdgeControlButtonItem.placeholder(withSize: 8, tag: SJEdgeControlLayerBottomItem_DurationTime)
         bottomAdapter.add(durationTimeItem)
         // 全屏按钮
-        let fullItem = SJEdgeControlButtonItem.placeholder(with: SJButtonItemPlaceholderType_49x49, tag: SJEdgeControlLayerBottomItem_FullBtn)
+        let fullItem = SJEdgeControlButtonItem.placeholder(with: SJButtonItemPlaceholderType_49xAutoresizing, tag: SJEdgeControlLayerBottomItem_FullBtn)
         fullItem.resetAppearIntervalWhenPerformingItemAction = false
         fullItem.addTarget(self, action: #selector(_fullItemWasTapped))
         bottomAdapter.add(fullItem)
@@ -589,17 +690,17 @@ extension SJCustomControlLayerViewController {
         /// 锁屏状态下, 使隐藏
         if ( videoPlayer.isLockedScreen ) {
             sj_view_makeDisappear(bottomContainerView, true)
-//            sj_view_makeAppear(bottomProgressIndicator, true);
+            sj_view_makeAppear(bottomProgressIndicator, true);
             return
         }
         
         /// 是否显示
         if ( videoPlayer.isControlLayerAppeared ) {
             sj_view_makeAppear(bottomContainerView, true)
-//            sj_view_makeDisappear(bottomProgressIndicator, true);
+            sj_view_makeDisappear(bottomProgressIndicator, true);
         } else {
             sj_view_makeDisappear(bottomContainerView, true)
-//            sj_view_makeAppear(_bottomProgressIndicator, YES);
+            sj_view_makeAppear(bottomProgressIndicator, true)
         }
         
     }
@@ -615,8 +716,6 @@ extension SJCustomControlLayerViewController {
     private func updateAppearStateForCustomStatusBar() {
         
     }
-    
-   
 }
 
 // MARK: - update items
@@ -631,7 +730,7 @@ extension SJCustomControlLayerViewController {
     
     private func _reloadTopAdapterIfNeeded() {
         if sj_view_isDisappeared(topContainerView) { return}
-        let sources = SJVideoPlayerSettings.common()
+        let sources = YDCustomVideoSettings.default
         let isFullscreen = videoPlayer.isFullScreen
         let isFitOnScreen = videoPlayer.isFitOnScreen
         let isPlayOnScrollView = videoPlayer.isPlayOnScrollView
@@ -688,40 +787,37 @@ extension SJCustomControlLayerViewController {
     private func _reloadBottomAdapterIfNeeded() {
         if sj_view_isDisappeared(bottomContainerView) {return}
         
-        let sources = SJVideoPlayerSettings.common()
-        
+        let sources = YDCustomVideoSettings.default
         // play item
         if let playItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Play), playItem.isHidden == false {
             playItem.image = videoPlayer.isPaused ? sources.playBtnImage : sources.pauseBtnImage
         }
         
-        //        // progress item
-        //        {
-        //            SJEdgeControlButtonItem *progressItem = [self.bottomAdapter itemForTag:SJEdgeControlLayerBottomItem_Progress];
-        //            if ( progressItem != nil && progressItem.hidden == NO ) {
-        //                SJProgressSlider *slider = progressItem.customView;
-        //                slider.traceImageView.backgroundColor = sources.progress_traceColor;
-        //                slider.trackImageView.backgroundColor = sources.progress_trackColor;
-        //                slider.bufferProgressColor = sources.progress_bufferColor;
-        //                slider.trackHeight = sources.progress_traceHeight;
-        //                slider.loadingColor = sources.loadingLineColor;
-        //
-        //                if ( sources.progress_thumbImage ) {
-        //                    slider.thumbImageView.image = sources.progress_thumbImage;
-        //                }
-        //                else if ( sources.progress_thumbSize ) {
-        //                    [slider setThumbCornerRadius:sources.progress_thumbSize * 0.5 size:CGSizeMake(sources.progress_thumbSize, sources.progress_thumbSize) thumbBackgroundColor:sources.progress_thumbColor];
-        //                }
-        //            }
-        //        }
-        //
+        if let progressItem = self.bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_Progress),
+           progressItem.isHidden == false,
+           let slider = progressItem.customView as?  SJProgressSlider{
+                slider.traceImageView.backgroundColor = sources.progress_traceColor
+                slider.trackImageView.backgroundColor = sources.progress_trackColor
+                slider.bufferProgressColor = sources.progress_bufferColor
+            slider.trackHeight = CGFloat(sources.progress_traceHeight)
+            slider.loadingColor = sources.loadingLineColor
+            if let progress_thumbImage = sources.progress_thumbImage {
+                slider.thumbImageView.image = progress_thumbImage
+            } else if sources.progress_thumbSize > 0 {
+                let psize = CGFloat(sources.progress_thumbSize)
+                slider.setThumbCornerRadius(psize * 0.5, size: CGSize(width: psize, height: psize), thumbBackgroundColor: sources.progress_thumbColor)
+            }
+        }
         // full item
-        
         if let fullItem = bottomAdapter.item(forTag: SJEdgeControlLayerBottomItem_FullBtn), fullItem.isHidden == false {
             let isFullscreen = videoPlayer.isFullScreen
             let isFitOnScreen = videoPlayer.isFitOnScreen
-            
             fullItem.image = (isFullscreen || isFitOnScreen) ? sources.shrinkscreenImage : sources.fullBtnImage
+            if (isFullscreen || isFitOnScreen) {
+                fullItem.insets = SJEdgeInsets(front: 0, rear: 20)
+            } else {
+                fullItem.insets = SJEdgeInsets(front: 0, rear: 0)
+            }
         }
         
         bottomAdapter.reload()
@@ -819,7 +915,7 @@ extension SJCustomControlLayerViewController {
     
     @available(iOS 14.0, *)
     private func _updateContentForPictureInPictureItem() {
-        let sources = SJVideoPlayerSettings.common()
+        let sources = YDCustomVideoSettings.default
         switch videoPlayer.playbackController.pictureInPictureStatus {
         case .running:
                 self.pictureInPictureItem.image = sources.pictureInPictureItemStopImage;
@@ -925,9 +1021,9 @@ extension SJCustomControlLayerViewController: SJProgressSliderDelegate {
 extension SJCustomControlLayerViewController {
     
     private func _textForTimeString(timeStr: String) ->NSAttributedString {
-        let source = SJVideoPlayerSettings.common()
+        let source = YDCustomVideoSettings.default
         return NSAttributedString.sj_UIKitText { (make) in
-           _ =  make.append(timeStr).font(source.timeFont ?? UIFont.systemFont(ofSize: 9, weight: .heavy)).textColor(.white).alignment(.center)
+           _ =  make.append(timeStr).font(source.timeFont).textColor(source.timeColor).alignment(.center)
         }
     }
 
@@ -955,4 +1051,124 @@ extension SJCustomControlLayerViewController {
             }
         }
     }
+}
+
+
+class YDVideoDraggingProgressPopView: UIView, SJDraggingProgressPopViewProtocol {
+    
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 8
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        return view
+    }()
+    
+    private lazy var directionImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFit
+        return view
+    }()
+    
+    private lazy var dragProgressTimeLabel: UILabel = {
+        let lbl = UILabel()
+        lbl.font = UIFont.systemFont(ofSize: 14)
+        lbl.textColor = #colorLiteral(red: 1, green: 0.6666666667, blue: 0.0862745098, alpha: 1)
+        lbl.textAlignment = .right
+        return lbl
+    }()
+    
+    private lazy var separatorLabel: UILabel = {
+        let lbl = UILabel()
+        lbl.font = UIFont.systemFont(ofSize: 14)
+        lbl.textColor = .white
+        lbl.text = "/"
+        return lbl
+    }()
+    
+    private lazy var durationLabel: UILabel = {
+        let lbl = UILabel()
+        lbl.font = UIFont.systemFont(ofSize: 14)
+        lbl.textColor = .white
+        lbl.textAlignment = .left
+        return lbl
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupSubViews()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupSubViews() {
+        addSubview(contentView)
+        contentView.addSubview(directionImageView)
+        contentView.addSubview(dragProgressTimeLabel)
+        contentView.addSubview(separatorLabel)
+        contentView.addSubview(durationLabel)
+        
+        contentView.snp.makeConstraints { (make) in
+            make.edges.equalTo(0)
+            make.width.equalTo(120)
+            make.height.equalTo(54)
+        }
+        
+        directionImageView.snp.makeConstraints { (make) in
+            make.top.equalTo(8)
+            make.centerX.equalToSuperview()
+        }
+        
+        separatorLabel.snp.makeConstraints { (make) in
+            make.centerX.equalToSuperview()
+            make.top.equalTo(directionImageView.snp.bottom).offset(2)
+        }
+        
+        dragProgressTimeLabel.snp.makeConstraints { (make) in
+            make.right.equalTo(separatorLabel.snp.left)
+            make.centerY.equalTo(separatorLabel)
+        }
+        
+        durationLabel.snp.makeConstraints { (make) in
+            make.left.equalTo(separatorLabel.snp.right)
+            make.centerY.equalTo(separatorLabel)
+        }
+    }
+    
+    
+    
+    
+    // MARK: - SJDraggingProgressPopViewProtocol
+
+    var style: SJDraggingProgressPopViewStyle = SJDraggingProgressPopViewStyleNormal
+    
+    var dragProgressTime: TimeInterval = 0 {
+        didSet {
+            let sources = YDCustomVideoSettings.default
+            if dragProgressTime > oldValue {
+                directionImageView.image = sources.fastImage
+            } else if dragProgressTime < oldValue {
+                directionImageView.image = sources.forwardImage
+            }
+            let str = NSString.init(currentTime: dragProgressTime, duration: duration)
+             
+            dragProgressTimeLabel.text = str as String
+            print("didset = ", str)
+        }
+    }
+    
+    var currentTime: TimeInterval = 0
+    
+    var duration: TimeInterval = 0 {
+        didSet {
+            durationLabel.text = NSString.init(currentTime: duration, duration: duration) as String
+        }
+    }
+    
+    var isPreviewImageHidden: Bool {
+        return style != SJDraggingProgressPopViewStyleFullscreen
+    }
+    
+    var previewImage: UIImage? = nil
 }

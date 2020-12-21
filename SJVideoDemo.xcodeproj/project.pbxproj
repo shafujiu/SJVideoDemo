@@ -45,7 +45,6 @@
 		41A077801A7A754C5E151C57 /* Pods-SJVideoDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SJVideoDemo.debug.xcconfig"; path = "Target Support Files/Pods-SJVideoDemo/Pods-SJVideoDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		5228FDAF8DE52521EFCD26E4 /* Pods_SJVideoDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SJVideoDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8110B5F2A0603817BFEEC8A8 /* Pods-SJVideoDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SJVideoDemoTests.debug.xcconfig"; path = "Target Support Files/Pods-SJVideoDemoTests/Pods-SJVideoDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
-		8160827B258888DE00625137 /* SJVideoDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SJVideoDemo-Bridging-Header.h"; sourceTree = "<group>"; };
 		8179D8C7258A0D3300E3F6A5 /* UIViewController+RotationControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+RotationControl.swift"; sourceTree = "<group>"; };
 		8181FEF7258CBC410036FADB /* TestControlController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestControlController.swift; sourceTree = "<group>"; };
 		81A87E9825884BD70077FB22 /* SJVideoDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SJVideoDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -130,7 +129,6 @@
 				81A87E9925884BD70077FB22 /* Products */,
 				2DDE125E7F74C831DFA78423 /* Pods */,
 				290D1D3AE3F466802ACB14B5 /* Frameworks */,
-				8160827B258888DE00625137 /* SJVideoDemo-Bridging-Header.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -652,7 +650,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shafujiu.SJVideoDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "SJVideoDemo-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -678,7 +676,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.shafujiu.SJVideoDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "SJVideoDemo-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
