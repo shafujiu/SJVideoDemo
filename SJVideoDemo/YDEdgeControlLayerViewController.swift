@@ -110,9 +110,26 @@ struct YDCustomVideoSettings {
     var forwardImage: UIImage? {
         UIImage(named: "icon_forward")
     }
+    
+    //
+    var replayBtnFont: UIFont {
+        SJVideoPlayerSettings.common().replayBtnFont ?? UIFont.systemFont(ofSize: 10)
+    }
+    
+    var replayBtnTitleColor: UIColor {
+        SJVideoPlayerSettings.common().replayBtnTitleColor ?? UIColor.white
+    }
+    
+    var replayBtnImage: UIImage? {
+        SJVideoPlayerSettings.common().replayBtnImage
+    }
+    
+    var replayBtnTitle: String {
+        SJVideoPlayerSettings.common().replayBtnTitle ?? ""
+    }
 }
 
-class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlLayer {
+class YDEdgeControlLayerViewController: SJEdgeControlLayerAdapters, SJControlLayer {
     
     /// 是否竖屏时隐藏返回按钮
     private var hiddenBackButtonWhenOrientationIsPortrait: Bool = false
@@ -506,7 +523,7 @@ class SJCustomControlLayerViewController: SJEdgeControlLayerAdapters, SJControlL
 }
 // MARK: -
 
-extension SJCustomControlLayerViewController {
+extension YDEdgeControlLayerViewController {
     private func setLoadingView(_ view: SJLoadingViewProtocol) {
         let loadV = view as! UIView
         controlView()?.addSubview(loadV)
@@ -517,7 +534,7 @@ extension SJCustomControlLayerViewController {
 }
 
 // MARK: - setupSubViews
-extension SJCustomControlLayerViewController {
+extension YDEdgeControlLayerViewController {
     private func setupSubViews() {
         addItemsToTopAdapter()
         _addItemsToLeftAdapter()
@@ -613,6 +630,7 @@ extension SJCustomControlLayerViewController {
         let replayLabel = UILabel()
         replayLabel.numberOfLines = 0
         let replayItem = SJEdgeControlButtonItem.frameLayout(withCustomView: replayLabel, tag: SJEdgeControlLayerCenterItem_Replay)
+        replayItem.addTarget(self, action: #selector(_replayItemWasTapped))
         centerAdapter.add(replayItem)
         centerAdapter.reload()
     }
@@ -634,6 +652,10 @@ extension SJCustomControlLayerViewController {
         videoPlayer.isLockedScreen = !videoPlayer.isLockedScreen
     }
     
+    @objc private func _replayItemWasTapped() {
+        videoPlayer.replay()
+    }
+    
     @available(iOS 14.0, *)
     @objc private func pictureInPictureItemWasTapped() {
         switch videoPlayer.playbackController.pictureInPictureStatus {
@@ -649,7 +671,7 @@ extension SJCustomControlLayerViewController {
 }
 
 // MARK: - appear state
-extension SJCustomControlLayerViewController {
+extension YDEdgeControlLayerViewController {
     
     private func updateAppearStateForContainerViews() {
         updateAppearStateForTopContainerView()
@@ -719,7 +741,7 @@ extension SJCustomControlLayerViewController {
 }
 
 // MARK: - update items
-extension SJCustomControlLayerViewController {
+extension YDEdgeControlLayerViewController {
     private func _reloadAdaptersIfNeeded() {
         _reloadTopAdapterIfNeeded()
         _reloadLeftAdapterIfNeeded()
@@ -828,7 +850,32 @@ extension SJCustomControlLayerViewController {
     }
     
     private func _reloadCenterAdapterIfNeeded() {
-        
+        if sj_view_isDisappeared(centerContainerView) { return}
+        if let replayItem = centerAdapter.item(forTag: SJEdgeControlLayerCenterItem_Replay) {
+            replayItem.isHidden = !videoPlayer.isPlaybackFinished
+            if replayItem.isHidden == false, replayItem.title == nil {
+                let sources = YDCustomVideoSettings.default
+                let textLbl = replayItem.customView as? UILabel
+                textLbl?.attributedText = NSAttributedString.sj_UIKitText({ (make) in
+                    _ = make.alignment(.center).lineSpacing(6)
+                    _ = make.font(sources.replayBtnFont)
+                    _ = make.textColor(sources.replayBtnTitleColor)
+                    
+                    if let replayBtnImage = sources.replayBtnImage {
+                        _ = make.appendImage{ make in
+                            make.image = replayBtnImage
+                        }
+                    }
+                    if sources.replayBtnTitle.count != 0 {
+                        if ( sources.replayBtnImage != nil ) {let _ = make.append("\n")}
+                        let _ = make.append(sources.replayBtnTitle)
+                    }
+                })
+                let size = textLbl?.attributedText?.sj_textSize() ?? .zero
+                textLbl?.bounds = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            }
+        }
+        centerAdapter.reload()
     }
     
     private func _updateContentForBottomCurrentTimeItemIfNeeded() {
@@ -995,7 +1042,7 @@ extension SJCustomControlLayerViewController {
 
 
 // MARK: - SJProgressSliderDelegate
-extension SJCustomControlLayerViewController: SJProgressSliderDelegate {
+extension YDEdgeControlLayerViewController: SJProgressSliderDelegate {
     func sliderWillBeginDragging(_ slider: SJProgressSlider) {
         
         if videoPlayer.assetStatus != SJAssetStatus.readyToPlay {
@@ -1018,7 +1065,7 @@ extension SJCustomControlLayerViewController: SJProgressSliderDelegate {
 }
 
 // MARK: -
-extension SJCustomControlLayerViewController {
+extension YDEdgeControlLayerViewController {
     
     private func _textForTimeString(timeStr: String) ->NSAttributedString {
         let source = YDCustomVideoSettings.default
@@ -1171,4 +1218,77 @@ class YDVideoDraggingProgressPopView: UIView, SJDraggingProgressPopViewProtocol 
     }
     
     var previewImage: UIImage? = nil
+}
+
+class YDVideoLoadingView: UIView, SJLoadingViewProtocol {
+    private lazy var activityView: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView()
+        view.style = .whiteLarge
+        return view
+    }()
+    
+    private lazy var titleLbl: UILabel = {
+        let lbl = UILabel()
+        lbl.font = UIFont.systemFont(ofSize: 14)
+        lbl.textColor = .white
+        lbl.text = "加载中"
+        return lbl
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupSubViews()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupSubViews() {
+        
+//        backgroundColor = UIColor.black.withAlphaComponent(0.8)
+        backgroundColor = .clear
+        layer.cornerRadius = 4
+        addSubview(activityView)
+        addSubview(titleLbl)
+        activityView.snp.makeConstraints { (make) in
+            make.left.equalToSuperview()
+            make.right.equalToSuperview()
+            make.top.equalToSuperview()
+            make.bottom.equalToSuperview().offset(-52)
+            make.width.height.equalTo(40)
+        }
+        
+        titleLbl.snp.makeConstraints { (make) in
+            make.top.equalTo(activityView.snp.bottom).offset(12)
+            make.centerX.equalToSuperview()
+        }
+    }
+    
+    
+    // MARK: - SJLoadingViewProtocol
+    var isAnimating: Bool {
+        activityView.isAnimating
+    }
+    
+    var showNetworkSpeed: Bool = true
+    
+    var networkSpeedStr: NSAttributedString? = nil
+    
+    func start() {
+        UIView.animate(withDuration: 0.3) {
+            self.alpha = 1
+        } completion: { (_) in
+            self.activityView.startAnimating()
+        }
+
+    }
+    
+    func stop() {
+        UIView.animate(withDuration: 0.3) {
+            self.alpha = 0
+        } completion: { (_) in
+            self.activityView.stopAnimating()
+        }
+    }
 }

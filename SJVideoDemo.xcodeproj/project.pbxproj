@@ -11,7 +11,6 @@
 		392A8A02CBA3D571E2AD5546 /* Pods_SJVideoDemo_SJVideoDemoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BFD3535A10BA27B40CEDC375 /* Pods_SJVideoDemo_SJVideoDemoUITests.framework */; };
 		816081FE25886B0200625137 /* Pods_SJVideoDemo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 411733890B6A5451E79CF022 /* Pods_SJVideoDemo.framework */; };
 		8179D8C8258A0D3300E3F6A5 /* UIViewController+RotationControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8179D8C7258A0D3300E3F6A5 /* UIViewController+RotationControl.swift */; };
-		8181FEF8258CBC410036FADB /* TestControlController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8181FEF7258CBC410036FADB /* TestControlController.swift */; };
 		81A87E9C25884BD70077FB22 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A87E9B25884BD70077FB22 /* AppDelegate.swift */; };
 		81A87EA025884BD70077FB22 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A87E9F25884BD70077FB22 /* ViewController.swift */; };
 		81A87EA325884BD70077FB22 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81A87EA125884BD70077FB22 /* Main.storyboard */; };
@@ -19,7 +18,7 @@
 		81A87EA825884BDA0077FB22 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81A87EA625884BDA0077FB22 /* LaunchScreen.storyboard */; };
 		81A87EB325884BDA0077FB22 /* SJVideoDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A87EB225884BDA0077FB22 /* SJVideoDemoTests.swift */; };
 		81A87EBE25884BDA0077FB22 /* SJVideoDemoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A87EBD25884BDA0077FB22 /* SJVideoDemoUITests.swift */; };
-		81D6C30F2588B7E900C4A84E /* SJCustomControlLayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81D6C30E2588B7E900C4A84E /* SJCustomControlLayerViewController.swift */; };
+		81D6C30F2588B7E900C4A84E /* YDEdgeControlLayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81D6C30E2588B7E900C4A84E /* YDEdgeControlLayerViewController.swift */; };
 		81D6C3112588BD4700C4A84E /* YDSJVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81D6C3102588BD4700C4A84E /* YDSJVideoPlayer.swift */; };
 /* End PBXBuildFile section */
 
@@ -46,7 +45,6 @@
 		5228FDAF8DE52521EFCD26E4 /* Pods_SJVideoDemoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SJVideoDemoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8110B5F2A0603817BFEEC8A8 /* Pods-SJVideoDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SJVideoDemoTests.debug.xcconfig"; path = "Target Support Files/Pods-SJVideoDemoTests/Pods-SJVideoDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		8179D8C7258A0D3300E3F6A5 /* UIViewController+RotationControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+RotationControl.swift"; sourceTree = "<group>"; };
-		8181FEF7258CBC410036FADB /* TestControlController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestControlController.swift; sourceTree = "<group>"; };
 		81A87E9825884BD70077FB22 /* SJVideoDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SJVideoDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		81A87E9B25884BD70077FB22 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		81A87E9F25884BD70077FB22 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -60,7 +58,7 @@
 		81A87EB925884BDA0077FB22 /* SJVideoDemoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SJVideoDemoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		81A87EBD25884BDA0077FB22 /* SJVideoDemoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SJVideoDemoUITests.swift; sourceTree = "<group>"; };
 		81A87EBF25884BDA0077FB22 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		81D6C30E2588B7E900C4A84E /* SJCustomControlLayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SJCustomControlLayerViewController.swift; sourceTree = "<group>"; };
+		81D6C30E2588B7E900C4A84E /* YDEdgeControlLayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YDEdgeControlLayerViewController.swift; sourceTree = "<group>"; };
 		81D6C3102588BD4700C4A84E /* YDSJVideoPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YDSJVideoPlayer.swift; sourceTree = "<group>"; };
 		BFD3535A10BA27B40CEDC375 /* Pods_SJVideoDemo_SJVideoDemoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SJVideoDemo_SJVideoDemoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F39B53B970DA342E74CF5665 /* Pods-SJVideoDemo-SJVideoDemoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SJVideoDemo-SJVideoDemoUITests.release.xcconfig"; path = "Target Support Files/Pods-SJVideoDemo-SJVideoDemoUITests/Pods-SJVideoDemo-SJVideoDemoUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -151,8 +149,7 @@
 				81A87EA425884BDA0077FB22 /* Assets.xcassets */,
 				81A87EA625884BDA0077FB22 /* LaunchScreen.storyboard */,
 				81A87EA925884BDA0077FB22 /* Info.plist */,
-				81D6C30E2588B7E900C4A84E /* SJCustomControlLayerViewController.swift */,
-				8181FEF7258CBC410036FADB /* TestControlController.swift */,
+				81D6C30E2588B7E900C4A84E /* YDEdgeControlLayerViewController.swift */,
 				81D6C3102588BD4700C4A84E /* YDSJVideoPlayer.swift */,
 				8179D8C7258A0D3300E3F6A5 /* UIViewController+RotationControl.swift */,
 			);
@@ -453,8 +450,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8179D8C8258A0D3300E3F6A5 /* UIViewController+RotationControl.swift in Sources */,
-				8181FEF8258CBC410036FADB /* TestControlController.swift in Sources */,
-				81D6C30F2588B7E900C4A84E /* SJCustomControlLayerViewController.swift in Sources */,
+				81D6C30F2588B7E900C4A84E /* YDEdgeControlLayerViewController.swift in Sources */,
 				81A87EA025884BD70077FB22 /* ViewController.swift in Sources */,
 				81D6C3112588BD4700C4A84E /* YDSJVideoPlayer.swift in Sources */,
 				81A87E9C25884BD70077FB22 /* AppDelegate.swift in Sources */,
