@@ -24,7 +24,9 @@ class YDSJVideoPlayer: SJVideoPlayer {
         }
     }
     
-    
+    deinit {
+        print("sfj_", self, "deinit")
+    }
     override init() {
         super.init()
         setupConfig()

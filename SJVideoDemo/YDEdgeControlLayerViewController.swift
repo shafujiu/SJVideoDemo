@@ -202,7 +202,7 @@ class YDEdgeControlLayerViewController: SJEdgeControlLayerAdapters, SJControlLay
     
     
     private var _restarted: Bool = false
-    private var videoPlayer: SJBaseVideoPlayer!
+    private weak var videoPlayer: SJBaseVideoPlayer!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
