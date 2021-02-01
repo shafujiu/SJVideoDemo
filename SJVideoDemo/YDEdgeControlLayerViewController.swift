@@ -732,7 +732,10 @@ extension YDEdgeControlLayerViewController {
     }
     
     private func updateAppearStateForCenterContainerView() {
-        
+        if centerAdapter.numberOfItems == 0 {
+            sj_view_makeDisappear(centerContainerView, true)
+        }
+        sj_view_makeAppear(centerContainerView, true)
     }
     
     private func updateAppearStateForCustomStatusBar() {
